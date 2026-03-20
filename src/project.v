@@ -16,12 +16,33 @@ module tt_um_friday (
     input  wire       rst_n     // reset_n - low to reset
 );
 
-  // All output pins must be assigned. If not used, assign to 0.
-  assign uo_out  = ui_in + uio_in;  // Example: ou_out is the sum of ui_in and uio_in
-  assign uio_out = 0;
-  assign uio_oe  = 0;
+    wire invalid = (ui_in[3] & ui_in[1]) | (ui_in[3] & ui_in[2]); 
+
+    reg [6:0]    segments;
+
+always @(*) begin
+    case (ui_in[3:0])
+      4'h0: segments = 7'b0111111; // 0
+      4'h1: segments = 7'b0000110; // 1
+      4'h2: segments = 7'b1011011; // 2
+      4'h3: segments = 7'b1001111; // 3
+      4'h4: segments = 7'b1100110; // 4
+      4'h5: segments = 7'b1101101; // 5
+      4'h6: segments = 7'b1111101; // 6
+      4'h7: segments = 7'b0000111; // 7
+      4'h8: segments = 7'b1111111; // 8
+      4'h9: segments = 7'b1101111; // 9
+      default: segments = 7'b1000000; // Παύλα (-) για λάθος είσοδο
+    endcase
+  end
+
+    assign uo_out[6:0] = segments;
+    assign uo_out[7] = invalid;
+
+    assign uio_out = 8'b0;
+    assign uio_oe = 8'b0;
 
   // List all unused inputs to prevent warnings
-  wire _unused = &{ena, clk, rst_n, 1'b0};
+    wire _unused = &{ena, clk, rst_n, uio_in, 1'b0};
 
 endmodule
